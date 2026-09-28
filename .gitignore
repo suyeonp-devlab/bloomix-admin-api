@@ -40,8 +40,5 @@ out/
 .env*
 !.env.example
 
-### Application ###
-application-local.yml
-
 ### Logs ###
 logs/
