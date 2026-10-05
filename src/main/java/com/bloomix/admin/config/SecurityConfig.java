@@ -40,7 +40,6 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-            .requestMatchers(HttpMethod.POST, "/api/auth/password").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
             .requestMatchers("/actuator/health", "/actuator/info").permitAll()
             .anyRequest().authenticated())
@@ -50,7 +49,7 @@ public class SecurityConfig {
                 handlerExceptionResolver.resolveException(request, response, null, e))
             .accessDeniedHandler((request, response, e) ->
                 handlerExceptionResolver.resolveException(request, response, null, e)))
-      .build();
+        .build();
   }
 
   @Bean

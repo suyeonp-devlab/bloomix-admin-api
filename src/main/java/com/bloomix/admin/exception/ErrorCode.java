@@ -18,10 +18,7 @@ public enum ErrorCode {
   FORBIDDEN(HttpStatus.FORBIDDEN, "AUTH_002", "접근 권한이 없습니다."),
   LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "AUTH_003", "아이디 또는 비밀번호가 올바르지 않습니다."),
   ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "AUTH_004", "비밀번호 5회 오류로 잠긴 계정입니다. 관리자에게 문의해주세요."),
-  ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "AUTH_005", "사용할 수 없는 계정입니다."),
-  PASSWORD_CHANGE_NOT_ALLOWED(HttpStatus.FORBIDDEN, "AUTH_006", "비밀번호 변경 대상 계정이 아닙니다."),
-  CURRENT_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "AUTH_007", "현재 비밀번호가 올바르지 않습니다."),
-  SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "AUTH_008", "새 비밀번호는 현재 비밀번호와 달라야 합니다.");
+  ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "AUTH_005", "사용할 수 없는 계정입니다.");
 
   private final HttpStatus status;
   private final String code;
