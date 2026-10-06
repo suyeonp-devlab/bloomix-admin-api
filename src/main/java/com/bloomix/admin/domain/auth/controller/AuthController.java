@@ -3,7 +3,9 @@ package com.bloomix.admin.domain.auth.controller;
 import com.bloomix.admin.domain.auth.service.AuthService;
 import com.bloomix.admin.domain.auth.dto.LoginRequest;
 import com.bloomix.admin.domain.auth.dto.LoginResponse;
+import com.bloomix.admin.domain.auth.dto.MeResponse;
 import com.bloomix.admin.response.ApiResponse;
+import com.bloomix.admin.security.CurrentAdminId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -69,5 +71,11 @@ public class AuthController {
   public ApiResponse<Void> logout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
     logoutHandler.logout(httpRequest, httpResponse, securityContextHolderStrategy.getContext().getAuthentication());
     return ApiResponse.success(null);
+  }
+
+  /** 내 정보 조회 */
+  @GetMapping("/me")
+  public ApiResponse<MeResponse> me(@CurrentAdminId String adminId) {
+    return ApiResponse.success(authService.getMe(adminId));
   }
 }

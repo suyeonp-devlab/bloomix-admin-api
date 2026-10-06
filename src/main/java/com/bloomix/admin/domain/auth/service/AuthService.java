@@ -4,6 +4,7 @@ import com.bloomix.admin.domain.admin.entity.AdminAccount;
 import com.bloomix.admin.domain.admin.repository.AdminAccountRepository;
 import com.bloomix.admin.domain.admin.entity.AdminStatus;
 import com.bloomix.admin.domain.auth.dto.LoginResponse;
+import com.bloomix.admin.domain.auth.dto.MeResponse;
 import com.bloomix.admin.exception.BizException;
 import com.bloomix.admin.exception.ErrorCode;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
   private final AdminAccountRepository adminAccountRepository;
@@ -57,5 +59,12 @@ public class AuthService {
 
     admin.succeededLogin(LocalDateTime.now());
     return LoginResponse.from(admin);
+  }
+
+  /** 내 정보 조회 */
+  public MeResponse getMe(String adminId) {
+    AdminAccount admin = adminAccountRepository.findById(adminId)
+        .orElseThrow(() -> new BizException(ErrorCode.UNAUTHORIZED));
+    return MeResponse.from(admin);
   }
 }

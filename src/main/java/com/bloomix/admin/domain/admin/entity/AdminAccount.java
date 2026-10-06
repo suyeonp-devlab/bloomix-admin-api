@@ -20,6 +20,9 @@ public class AdminAccount extends BaseEntity {
   @Id
   private String adminId;
 
+  // 어드민 이름
+  private String adminName;
+
   // 비밀번호
   private String password;
 
