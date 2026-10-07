@@ -69,7 +69,7 @@ public class CommonCodeService {
 
     validateDuplicateCodes(request.codes());
 
-    CommonCodeGroup group = commonCodeGroupRepository.findWithLockByGroupCode(groupCode)
+    CommonCodeGroup group = commonCodeGroupRepository.findById(groupCode)
         .orElseThrow(() -> new BizException(ErrorCode.CODE_GROUP_NOT_FOUND));
 
     // 코드 일괄 수정 시 기존 등록 코드를 반드시 포함해야 한다. 미포함 시 400 오류
