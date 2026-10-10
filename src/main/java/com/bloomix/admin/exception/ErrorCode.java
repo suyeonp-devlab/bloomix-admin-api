@@ -21,7 +21,11 @@ public enum ErrorCode {
   ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "AUTH_005", "사용할 수 없는 계정입니다."),
 
   CODE_GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "CODE_001", "공통코드 그룹을 찾을 수 없습니다."),
-  DUPLICATE_CODE_GROUP(HttpStatus.CONFLICT, "CODE_002", "이미 존재하는 공통코드 그룹입니다.");
+  DUPLICATE_CODE_GROUP(HttpStatus.CONFLICT, "CODE_002", "이미 존재하는 공통코드 그룹입니다."),
+
+  MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "MENU_001", "메뉴를 찾을 수 없습니다."),
+  DUPLICATE_MENU_ID(HttpStatus.CONFLICT, "MENU_002", "이미 존재하는 메뉴 ID입니다."),
+  DUPLICATE_MENU_PATH(HttpStatus.CONFLICT, "MENU_003", "이미 사용 중인 메뉴 경로입니다.");
 
   private final HttpStatus status;
   private final String code;
