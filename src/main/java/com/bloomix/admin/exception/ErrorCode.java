@@ -25,7 +25,11 @@ public enum ErrorCode {
 
   MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "MENU_001", "메뉴를 찾을 수 없습니다."),
   DUPLICATE_MENU_ID(HttpStatus.CONFLICT, "MENU_002", "이미 존재하는 메뉴 ID입니다."),
-  DUPLICATE_MENU_PATH(HttpStatus.CONFLICT, "MENU_003", "이미 사용 중인 메뉴 경로입니다.");
+  DUPLICATE_MENU_PATH(HttpStatus.CONFLICT, "MENU_003", "이미 사용 중인 메뉴 경로입니다."),
+
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_001", "회원을 찾을 수 없습니다."),
+  INVALID_USER_STATUS_CHANGE(HttpStatus.BAD_REQUEST, "USER_002", "변경할 수 없는 회원 상태입니다."),
+  USER_STATUS_CONFLICT(HttpStatus.CONFLICT, "USER_003", "다른 곳에서 회원 상태가 먼저 변경되어 처리하지 못했습니다. 다시 조회해주세요.");
 
   private final HttpStatus status;
   private final String code;
