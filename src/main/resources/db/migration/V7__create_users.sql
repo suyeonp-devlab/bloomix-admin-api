@@ -1,0 +1,21 @@
+CREATE TABLE users (
+    user_id             UUID PRIMARY KEY,
+    provider            VARCHAR(20) NOT NULL,
+    provider_id         VARCHAR(100),
+    email               VARCHAR(254),
+    password            VARCHAR(100),
+    password_fail_count INTEGER NOT NULL DEFAULT 0,
+    password_changed_at TIMESTAMP,
+    nickname            VARCHAR(30),
+    status              VARCHAR(20) NOT NULL,
+    last_login_at       TIMESTAMP,
+    created_by          VARCHAR(50) NOT NULL,
+    created_at          TIMESTAMP NOT NULL,
+    updated_by          VARCHAR(50) NOT NULL,
+    updated_at          TIMESTAMP NOT NULL,
+    CONSTRAINT uk_users_provider_id UNIQUE (provider, provider_id),
+    CONSTRAINT uk_users_email UNIQUE (email),
+    CONSTRAINT uk_users_nickname UNIQUE (nickname),
+    CONSTRAINT ck_users_provider CHECK (provider IN ('LOCAL', 'GOOGLE', 'NAVER')),
+    CONSTRAINT ck_users_status CHECK (status IN ('ACTIVE', 'LOCKED', 'SUSPENDED', 'WITHDRAWN'))
+);
