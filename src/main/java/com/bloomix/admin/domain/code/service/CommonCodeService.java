@@ -118,6 +118,12 @@ public class CommonCodeService {
         .map(CommonCodeResponse::from).toList();
   }
 
+  /** 코드명 조회 (code → codeName) */
+  public Map<String, String> getCodeNameMap(String groupCode) {
+    return commonCodeRepository.findByGroupCodeOrderBySortOrderAscCodeAsc(groupCode).stream()
+        .collect(Collectors.toMap(CommonCode::getCode, CommonCode::getCodeName));
+  }
+
   /** 코드 중복 여부 검사 */
   private void validateDuplicateCodes(List<CommonCodeRequest> codes) {
     Set<String> seen = new HashSet<>();

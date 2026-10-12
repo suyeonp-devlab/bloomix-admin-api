@@ -1,5 +1,6 @@
 package com.bloomix.admin.domain.user.service;
 
+import com.bloomix.admin.domain.code.service.CommonCodeService;
 import com.bloomix.admin.domain.user.dto.UserListRequest;
 import com.bloomix.admin.domain.user.dto.UserResponse;
 import com.bloomix.admin.domain.user.dto.UserStatusRequest;
@@ -9,6 +10,7 @@ import com.bloomix.admin.domain.user.repository.UserRepository;
 import com.bloomix.admin.exception.BizException;
 import com.bloomix.admin.exception.ErrorCode;
 import com.bloomix.admin.response.PageResponse;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +22,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
 
+  private static final String PROVIDER_GROUP_CODE = "USER_PROVIDER";
+  private static final String STATUS_GROUP_CODE = "USER_STATUS";
+
   private final UserRepository userRepository;
+  private final CommonCodeService commonCodeService;
 
   /** 회원 목록 조회 */
   public PageResponse<UserResponse> searchUsers(UserListRequest condition, Pageable pageable) {
-    return PageResponse.from(
-      userRepository.searchUsers(condition, pageable).map(UserResponse::from));
+
+    Map<String, String> providerNames = commonCodeService.getCodeNameMap(PROVIDER_GROUP_CODE);
+    Map<String, String> statusNames = commonCodeService.getCodeNameMap(STATUS_GROUP_CODE);
+
+    return PageResponse.from(userRepository.searchUsers(condition, pageable)
+        .map(user -> UserResponse.of(user, providerNames, statusNames)));
   }
 
   /** 회원 상세 조회 */
@@ -34,7 +44,9 @@ public class UserService {
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new BizException(ErrorCode.USER_NOT_FOUND));
 
-    return UserResponse.from(user);
+    return UserResponse.of(user,
+        commonCodeService.getCodeNameMap(PROVIDER_GROUP_CODE),
+        commonCodeService.getCodeNameMap(STATUS_GROUP_CODE));
   }
 
   /** 회원 상태 변경 (이용정지, 정지 해제) */
