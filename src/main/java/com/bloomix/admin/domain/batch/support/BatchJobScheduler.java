@@ -42,7 +42,8 @@ public class BatchJobScheduler {
   public void initialize() {
 
     // 남은 RUNNING 이력 정리
-    batchJobHistoryService.failStaleRunning();
+    List<Long> jobExecutionIds = batchJobHistoryService.failStaleRunning();
+    batchJobLauncher.recover(jobExecutionIds);
 
     // 자동 실행 등록
     List<BatchJob> jobs = batchJobRepository.findByEnabledTrueAndCronExpressionIsNotNull();

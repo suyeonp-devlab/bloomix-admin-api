@@ -1,15 +1,13 @@
 package com.bloomix.admin.domain.batch.support;
 
-import com.bloomix.admin.domain.batch.entity.BatchStatus;
 import com.bloomix.admin.domain.batch.entity.BatchJobHistory;
+import com.bloomix.admin.domain.batch.entity.BatchStatus;
 import com.bloomix.admin.domain.batch.entity.BatchTriggerType;
 import com.bloomix.admin.domain.batch.repository.BatchJobHistoryRepository;
 import com.bloomix.admin.domain.batch.repository.BatchJobRepository;
 import com.bloomix.admin.domain.batch.service.BatchJobHistoryService;
 import com.bloomix.admin.exception.BizException;
 import com.bloomix.admin.exception.ErrorCode;
-import java.util.Map;
-
 import com.bloomix.admin.util.ExceptionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +18,9 @@ import org.springframework.batch.core.job.parameters.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 /** 배치 실행기 */
 @Slf4j
@@ -73,6 +74,21 @@ public class BatchJobLauncher {
 
     checkLaunched(historyId, jobId, execution);
     return historyId;
+  }
+
+  /** 중단된 배치 실행 기록 정리 */
+  public void recover(List<Long> jobExecutionIds) {
+
+    for (Long jobExecutionId : jobExecutionIds) {
+      JobExecution execution = jobRepository.getJobExecution(jobExecutionId);
+      if (execution == null) continue;
+
+      try {
+        jobOperator.recover(execution);
+      } catch (Exception e) {
+        log.warn("배치 실행 기록 정리 실패. executionId={}", jobExecutionId, e);
+      }
+    }
   }
 
   /** 배치 재시작 (실패 지점부터) */

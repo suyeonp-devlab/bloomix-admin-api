@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -96,7 +97,7 @@ public class BatchJobHistoryService {
 
   /** (앱 시작 시) 남아 있는 RUNNING 이력 정리 */
   @Transactional
-  public void failStaleRunning() {
+  public List<Long> failStaleRunning() {
 
     List<BatchJobHistory> running = batchJobHistoryRepository.findByStatus(BatchStatus.RUNNING);
     running.forEach(history -> history.finish(BatchStatus.FAILED, SERVER_RESTART_MESSAGE));
@@ -104,6 +105,11 @@ public class BatchJobHistoryService {
     if (!running.isEmpty()) {
       log.warn("RUNNING 상태로 남은 배치 이력 {}건을 FAILED로 변경", running.size());
     }
+
+    return running.stream()
+        .map(BatchJobHistory::getJobExecutionId)
+        .filter(Objects::nonNull)
+        .toList();
   }
 
   /** 배치 RUNNING 이력 조회 */
