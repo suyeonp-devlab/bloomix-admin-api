@@ -29,7 +29,15 @@ public enum ErrorCode {
 
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_001", "회원을 찾을 수 없습니다."),
   INVALID_USER_STATUS_CHANGE(HttpStatus.BAD_REQUEST, "USER_002", "변경할 수 없는 회원 상태입니다."),
-  USER_STATUS_CONFLICT(HttpStatus.CONFLICT, "USER_003", "다른 곳에서 회원 상태가 먼저 변경되어 처리하지 못했습니다. 다시 조회해주세요.");
+  USER_STATUS_CONFLICT(HttpStatus.CONFLICT, "USER_003", "다른 곳에서 회원 상태가 먼저 변경되어 처리하지 못했습니다. 다시 조회해주세요."),
+
+  BATCH_JOB_NOT_FOUND(HttpStatus.NOT_FOUND, "BATCH_001", "배치를 찾을 수 없습니다."),
+  BATCH_JOB_NOT_DEFINED(HttpStatus.BAD_REQUEST, "BATCH_002", "실행할 수 있는 배치 작업이 없습니다. 배치 ID를 확인해주세요."),
+  BATCH_ALREADY_RUNNING(HttpStatus.CONFLICT, "BATCH_003", "이미 실행 중인 배치입니다."),
+  BATCH_LAUNCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_004", "배치 실행을 시작하지 못했습니다."),
+  BATCH_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "BATCH_005", "실행 이력을 찾을 수 없습니다."),
+  BATCH_RESTART_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "BATCH_006", "재시작할 수 없는 실행 이력입니다. 가장 최근에 실패한 실행만 재시작할 수 있습니다."),
+  DUPLICATE_BATCH_JOB(HttpStatus.CONFLICT, "BATCH_007", "이미 등록된 배치입니다.");
 
   private final HttpStatus status;
   private final String code;

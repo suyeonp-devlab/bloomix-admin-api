@@ -2,7 +2,6 @@ package com.bloomix.admin.util;
 
 import org.springframework.util.StringUtils;
 
-/** 개인정보 마스킹 */
 public final class MaskingUtil {
 
   private static final int VISIBLE_LENGTH = 3;
