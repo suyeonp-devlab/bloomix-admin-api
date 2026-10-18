@@ -70,11 +70,15 @@ public class BatchJobScheduler {
       return;
     }
 
-    ScheduledFuture<?> future = batchTaskScheduler.schedule(
-        () -> runScheduled(jobId),
-        new CronTrigger(batchJob.getCronExpression(), ZONE));
+    try {
+      ScheduledFuture<?> future = batchTaskScheduler.schedule(
+          () -> runScheduled(jobId),
+          new CronTrigger(batchJob.getCronExpression(), ZONE));
 
-    scheduled.put(jobId, future);
+      scheduled.put(jobId, future);
+    } catch (IllegalArgumentException e) {
+      log.error("(자동 실행 미등록) cron 형식 오류: jobId={}, cron={}", jobId, batchJob.getCronExpression());
+    }
   }
 
   /** 자동 실행 해제 */

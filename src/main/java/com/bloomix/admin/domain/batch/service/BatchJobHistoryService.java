@@ -42,8 +42,15 @@ public class BatchJobHistoryService {
   /** 배치 실행 이력 생성 (RUNNING) */
   @Transactional
   public Long createRunning(String jobId, BatchTriggerType triggerType, Map<String, String> parameters) {
+    return createRunning(jobId, triggerType, parameters, null);
+  }
+
+  /** 배치 실행 이력 생성 (RUNNING, Spring Batch 실행 ID 미리 연결) */
+  @Transactional
+  public Long createRunning(String jobId, BatchTriggerType triggerType, Map<String, String> parameters, Long jobExecutionId) {
     try {
       BatchJobHistory history = BatchJobHistory.start(jobId, triggerType, parameters);
+      history.linkExecution(jobExecutionId);
       return batchJobHistoryRepository.saveAndFlush(history).getHistoryId();
     } catch (DataIntegrityViolationException e) {
       throw new BizException(ErrorCode.BATCH_ALREADY_RUNNING);
@@ -75,8 +82,16 @@ public class BatchJobHistoryService {
   /** 배치 실행 종료 (이력 ID 기준) */
   @Transactional
   public void finish(Long historyId, BatchStatus status, String message) {
-    batchJobHistoryRepository.findById(historyId)
-      .ifPresent(history -> history.finish(status, message));
+    finish(historyId, status, message, null);
+  }
+
+  /** 배치 실행 종료 (이력 ID 기준, Spring Batch 실행 ID 연결) */
+  @Transactional
+  public void finish(Long historyId, BatchStatus status, String message, Long jobExecutionId) {
+    batchJobHistoryRepository.findById(historyId).ifPresent(history -> {
+      if (jobExecutionId != null) history.linkExecution(jobExecutionId);
+      history.finish(status, message);
+    });
   }
 
   /** (앱 시작 시) 남아 있는 RUNNING 이력 정리 */

@@ -64,12 +64,14 @@ public class BatchJobLauncher {
     builder.addLong(RUN_ID, historyId);
 
     // Job 시작
+    JobExecution execution = null;
     try {
-      jobOperator.start(job, builder.toJobParameters());
+      execution = jobOperator.start(job, builder.toJobParameters());
     } catch (Exception e) {
       launchFailed(historyId, jobId, e);
     }
 
+    checkLaunched(historyId, jobId, execution);
     return historyId;
   }
 
@@ -87,16 +89,19 @@ public class BatchJobLauncher {
     }
 
     // 실행 이력 생성 (RUNNING)
+    // 실패한 실행 ID 미리 연결: 재시작이 시작 단계에서 실패해도 다시 재시작할 수 있도록
     Long newHistoryId = batchJobHistoryService.createRunning(
-        failed.getJobId(), BatchTriggerType.RESTART, failed.getParameters());
+        failed.getJobId(), BatchTriggerType.RESTART, failed.getParameters(), failedExecution.getId());
 
     // Job 재시작
+    JobExecution execution = null;
     try {
-      jobOperator.restart(failedExecution);
+      execution = jobOperator.restart(failedExecution);
     } catch (Exception e) {
       launchFailed(newHistoryId, failed.getJobId(), e);
     }
 
+    checkLaunched(newHistoryId, failed.getJobId(), execution);
     return newHistoryId;
   }
 
@@ -117,6 +122,25 @@ public class BatchJobLauncher {
   private void launchFailed(Long historyId, String jobId, Exception e) {
     log.error("배치 실행 시작 실패. jobId={}, historyId={}", jobId, historyId, e);
     batchJobHistoryService.finish(historyId, BatchStatus.FAILED, ExceptionUtil.summary(e));
+    throw new BizException(ErrorCode.BATCH_LAUNCH_FAILED);
+  }
+
+  /**
+   * Job 시작 여부 확인
+   * 스레드풀 포화 시 예외 없이 FAILED 리턴 → 이력이 RUNNING으로 남는 것 방지
+   */
+  private void checkLaunched(Long historyId, String jobId, JobExecution execution) {
+
+    if (execution.getStatus() != org.springframework.batch.core.BatchStatus.FAILED
+      || execution.getStartTime() != null) {
+      return;
+    }
+
+    String description = execution.getExitStatus().getExitDescription();
+    String message = description.lines().findFirst().orElse(null);
+
+    log.error("배치 실행 시작 실패 (스레드풀 거부). jobId={}, historyId={}, executionId={}", jobId, historyId, execution.getId());
+    batchJobHistoryService.finish(historyId, BatchStatus.FAILED, message, execution.getId());
     throw new BizException(ErrorCode.BATCH_LAUNCH_FAILED);
   }
 }
