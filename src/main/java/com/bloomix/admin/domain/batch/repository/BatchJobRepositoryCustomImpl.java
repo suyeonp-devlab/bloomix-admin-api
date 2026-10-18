@@ -27,7 +27,7 @@ public class BatchJobRepositoryCustomImpl implements BatchJobRepositoryCustom {
     List<BatchJob> content = queryFactory
         .selectFrom(batchJob)
         .where(where)
-        .orderBy(batchJob.createdAt.desc())
+        .orderBy(batchJob.createdAt.desc(), batchJob.jobId.asc())
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
         .fetch();

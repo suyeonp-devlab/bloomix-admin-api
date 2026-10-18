@@ -97,14 +97,14 @@ public class BatchJobService {
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public void runJob(String jobId, BatchJobRunRequest request) {
     Long historyId = batchJobLauncher.run(jobId, BatchTriggerType.MANUAL, request == null ? null : request.parameters());
-    log.debug("batch execution triggered manually. jobId={}, historyId={}", jobId, historyId);
+    log.debug("배치 즉시 실행 요청. jobId={}, historyId={}", jobId, historyId);
   }
 
   /** 배치 재시작 */
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public void restartJob(Long historyId) {
     Long newHistoryId = batchJobLauncher.restart(historyId);
-    log.debug("batch restarted. historyId={}, newHistoryId={}", historyId, newHistoryId);
+    log.debug("배치 재시작 요청. historyId={}, newHistoryId={}", historyId, newHistoryId);
   }
 
   /** 배치 등록 및 수정 검사 */
