@@ -8,6 +8,7 @@ public record CommonCodeGroupListResponse(
   String groupName,
   String description,
   boolean enabled,
+  String updatedBy,
   LocalDateTime updatedAt
 ) {
 
@@ -17,6 +18,7 @@ public record CommonCodeGroupListResponse(
         group.getGroupName(),
         group.getDescription(),
         group.isEnabled(),
+        group.getUpdatedBy(),
         group.getUpdatedAt()
     );
   }
