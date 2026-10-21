@@ -47,8 +47,8 @@ public class CommonCodeGroupRepositoryCustomImpl implements CommonCodeGroupRepos
     // 검색구분 + 키워드
     if (StringUtils.hasText(condition.keyword())) {
       switch (condition.searchType()) {
-        case "groupCode" -> builder.and(commonCodeGroup.groupCode.containsIgnoreCase(condition.keyword()));
-        case "groupName" -> builder.and(commonCodeGroup.groupName.containsIgnoreCase(condition.keyword()));
+        case "CODE" -> builder.and(commonCodeGroup.groupCode.containsIgnoreCase(condition.keyword()));
+        case "NAME" -> builder.and(commonCodeGroup.groupName.containsIgnoreCase(condition.keyword()));
         case null, default -> { }
       }
     }

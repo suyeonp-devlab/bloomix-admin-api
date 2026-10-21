@@ -62,9 +62,9 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     // 검색구분 + 키워드
     if (StringUtils.hasText(condition.keyword())) {
       switch (condition.searchType()) {
-        case "providerId" -> builder.and(user.providerId.eq(condition.keyword()));
-        case "email" -> builder.and(user.email.eq(condition.keyword()));
-        case "nickname" -> builder.and(user.nickname.containsIgnoreCase(condition.keyword()));
+        case "PROVIDER_ID" -> builder.and(user.providerId.eq(condition.keyword()));
+        case "EMAIL" -> builder.and(user.email.eq(condition.keyword()));
+        case "NICKNAME" -> builder.and(user.nickname.containsIgnoreCase(condition.keyword()));
         case null, default -> { }
       }
     }

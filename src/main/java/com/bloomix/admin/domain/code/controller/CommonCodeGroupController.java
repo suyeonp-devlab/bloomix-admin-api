@@ -49,7 +49,7 @@ public class CommonCodeGroupController {
     return ApiResponse.success(null);
   }
 
-  /** 그룹 + 코드 일괄 수정 */
+  /** 코드 그룹 + 코드 일괄 수정 */
   @PutMapping("/{groupCode}")
   public ApiResponse<Void> updateGroup(
       @PathVariable String groupCode,
