@@ -28,4 +28,16 @@ public final class MaskingUtil {
 
     return maskId(email.substring(0, at)) + email.substring(at);
   }
+
+  /** 이름 마스킹: 첫 글자와 마지막 글자만 노출 */
+  public static String maskName(String name) {
+
+    if (!StringUtils.hasText(name)) return name;
+
+    String value = name.trim();
+    if (value.length() == 1) return "*";
+    if (value.length() == 2) return value.charAt(0) + "*";
+
+    return value.charAt(0) + "*".repeat(value.length() - 2) + value.charAt(value.length() - 1);
+  }
 }
