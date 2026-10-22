@@ -93,33 +93,33 @@ public class KopisFacility extends BaseEntity {
   // 시설 생성
   public static KopisFacility create(KopisFacilityDetail detail) {
     KopisFacility entity = new KopisFacility();
-    entity.facilityId = text(detail.mt10id());
+    entity.facilityId = text(detail.getMt10id());
     entity.update(detail);
     return entity;
   }
 
   // 시설 갱신
   public void update(KopisFacilityDetail detail) {
-    this.name = text(detail.fcltynm());
-    this.hallCount = integer(detail.mt13cnt());
-    this.characteristic = text(detail.fcltychartr());
-    this.openedYear = text(detail.opende());
-    this.seatScale = integer(detail.seatscale());
-    this.phone = text(detail.telno());
-    this.homepageUrl = text(detail.relateurl());
-    this.address = text(detail.adres());
-    this.latitude = decimal(detail.la());
-    this.longitude = decimal(detail.lo());
-    this.restaurant = yn(detail.restaurant());
-    this.cafe = yn(detail.cafe());
-    this.store = yn(detail.store());
-    this.kidsRoom = yn(detail.nolibang());
-    this.nursingRoom = yn(detail.suyu());
-    this.parkingLot = yn(detail.parkinglot());
-    this.barrierParking = yn(detail.parkbarrier());
-    this.barrierRestroom = yn(detail.restbarrier());
-    this.barrierRamp = yn(detail.runwbarrier());
-    this.barrierElevator = yn(detail.elevbarrier());
-    this.halls = detail.mt13s();
+    this.name = text(detail.getFcltynm());
+    this.hallCount = integer(detail.getMt13cnt());
+    this.characteristic = text(detail.getFcltychartr());
+    this.openedYear = text(detail.getOpende());
+    this.seatScale = integer(detail.getSeatscale());
+    this.phone = text(detail.getTelno());
+    this.homepageUrl = text(detail.getRelateurl());
+    this.address = text(detail.getAdres());
+    this.latitude = decimal(detail.getLa());
+    this.longitude = decimal(detail.getLo());
+    this.restaurant = yn(detail.getRestaurant());
+    this.cafe = yn(detail.getCafe());
+    this.store = yn(detail.getStore());
+    this.kidsRoom = yn(detail.getNolibang());
+    this.nursingRoom = yn(detail.getSuyu());
+    this.parkingLot = yn(detail.getParkinglot());
+    this.barrierParking = yn(detail.getParkbarrier());
+    this.barrierRestroom = yn(detail.getRestbarrier());
+    this.barrierRamp = yn(detail.getRunwbarrier());
+    this.barrierElevator = yn(detail.getElevbarrier());
+    this.halls = detail.getMt13s();
   }
 }

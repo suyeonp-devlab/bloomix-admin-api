@@ -76,7 +76,7 @@ public class KopisPerformanceReader implements ItemStreamReader<KopisPerformance
       // 현재 페이지에서 다음 공연
       while (offset < buffer.size()) {
         KopisPerformanceListItem item = buffer.get(offset++);
-        String id = text(item.mt20id());
+        String id = text(item.getMt20id());
         if (id == null) throw new KopisInvalidDataException("공연ID 없음: " + item);
         if (readIds.add(id)) return item;   // 이미 읽은 공연은 건너뜀
       }

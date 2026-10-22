@@ -197,8 +197,8 @@ public class KopisCollectJobConfig {
       KopisFacilityDetail detail = kopisClient.getFacility(facilityId)
         .orElseThrow(() -> new KopisInvalidDataException("시설상세 없음: " + facilityId));
 
-      if (text(detail.fcltynm()) == null) {
-        throw new KopisInvalidDataException("필수값 누락: " + facilityId + ", fcltynm=" + detail.fcltynm());
+      if (text(detail.getFcltynm()) == null) {
+        throw new KopisInvalidDataException("필수값 누락: " + facilityId + ", fcltynm=" + detail.getFcltynm());
       }
 
       return detail;

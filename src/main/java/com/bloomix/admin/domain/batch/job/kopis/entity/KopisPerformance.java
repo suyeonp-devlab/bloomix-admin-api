@@ -129,45 +129,45 @@ public class KopisPerformance extends BaseEntity {
   // 공연 생성
   public static KopisPerformance create(KopisPerformanceDetail detail) {
     KopisPerformance entity = new KopisPerformance();
-    entity.performanceId = text(detail.mt20id());
+    entity.performanceId = text(detail.getMt20id());
     entity.update(detail);
     return entity;
   }
 
   // 공연 갱신
   public void update(KopisPerformanceDetail detail) {
-    this.title = text(detail.prfnm());
-    this.genreName = text(detail.genrenm());
-    this.state = text(detail.prfstate());
-    this.startDate = date(detail.prfpdfrom());
-    this.endDate = date(detail.prfpdto());
-    this.area = text(detail.area());
-    this.facilityId = text(detail.mt10id());
-    this.facilityName = text(detail.fcltynm());
-    this.hallId = text(detail.mt13id());
-    this.posterUrl = text(detail.poster());
-    this.castMembers = text(detail.prfcast());
-    this.crew = text(detail.prfcrew());
-    this.runtime = text(detail.prfruntime());
-    this.ageLimit = text(detail.prfage());
-    this.priceText = text(detail.pcseguidance());
-    this.scheduleText = text(detail.dtguidance());
-    this.story = text(detail.sty());
-    this.producer = text(detail.entrpsnm());
-    this.productionCompany = text(detail.entrpsnmP());
-    this.planningCompany = text(detail.entrpsnmA());
-    this.host = text(detail.entrpsnmH());
-    this.organizer = text(detail.entrpsnmS());
-    this.openRun = yn(detail.openrun());
-    this.visit = yn(detail.visit());
-    this.child = yn(detail.child());
-    this.daehakro = yn(detail.daehakro());
-    this.festival = yn(detail.festival());
-    this.musicalLicense = yn(detail.musicallicense());
-    this.musicalCreate = yn(detail.musicalcreate());
-    this.introImages = detail.styurls() == null ? null
-      : detail.styurls().stream().map(KopisValueParser::text).filter(Objects::nonNull).toList();
-    this.registeredAt = dateTime(detail.frstregdt());
-    this.sourceUpdatedAt = dateTime(detail.updatedate());
+    this.title = text(detail.getPrfnm());
+    this.genreName = text(detail.getGenrenm());
+    this.state = text(detail.getPrfstate());
+    this.startDate = date(detail.getPrfpdfrom());
+    this.endDate = date(detail.getPrfpdto());
+    this.area = text(detail.getArea());
+    this.facilityId = text(detail.getMt10id());
+    this.facilityName = text(detail.getFcltynm());
+    this.hallId = text(detail.getMt13id());
+    this.posterUrl = text(detail.getPoster());
+    this.castMembers = text(detail.getPrfcast());
+    this.crew = text(detail.getPrfcrew());
+    this.runtime = text(detail.getPrfruntime());
+    this.ageLimit = text(detail.getPrfage());
+    this.priceText = text(detail.getPcseguidance());
+    this.scheduleText = text(detail.getDtguidance());
+    this.story = text(detail.getSty());
+    this.producer = text(detail.getEntrpsnm());
+    this.productionCompany = text(detail.getEntrpsnmP());
+    this.planningCompany = text(detail.getEntrpsnmA());
+    this.host = text(detail.getEntrpsnmH());
+    this.organizer = text(detail.getEntrpsnmS());
+    this.openRun = yn(detail.getOpenrun());
+    this.visit = yn(detail.getVisit());
+    this.child = yn(detail.getChild());
+    this.daehakro = yn(detail.getDaehakro());
+    this.festival = yn(detail.getFestival());
+    this.musicalLicense = yn(detail.getMusicallicense());
+    this.musicalCreate = yn(detail.getMusicalcreate());
+    this.introImages = detail.getStyurls() == null ? null
+      : detail.getStyurls().stream().map(KopisValueParser::text).filter(Objects::nonNull).toList();
+    this.registeredAt = dateTime(detail.getFrstregdt());
+    this.sourceUpdatedAt = dateTime(detail.getUpdatedate());
   }
 }

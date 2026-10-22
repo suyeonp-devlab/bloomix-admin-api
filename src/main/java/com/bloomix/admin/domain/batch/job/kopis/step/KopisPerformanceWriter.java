@@ -24,7 +24,7 @@ public class KopisPerformanceWriter implements ItemWriter<KopisPerformanceDetail
   public void write(Chunk<? extends KopisPerformanceDetail> chunk) {
 
     List<String> ids = chunk.getItems().stream()
-        .map(detail -> text(detail.mt20id())).toList();
+        .map(detail -> text(detail.getMt20id())).toList();
 
     Map<String, KopisPerformance> existing = kopisPerformanceRepository.findAllById(ids).stream()
         .collect(Collectors.toMap(KopisPerformance::getPerformanceId, Function.identity()));
@@ -32,7 +32,7 @@ public class KopisPerformanceWriter implements ItemWriter<KopisPerformanceDetail
     // 기존은 갱신(변경 감지), 신규는 추가
     List<KopisPerformance> created = new ArrayList<>();
     for (KopisPerformanceDetail detail : chunk) {
-      KopisPerformance performance = existing.get(text(detail.mt20id()));
+      KopisPerformance performance = existing.get(text(detail.getMt20id()));
       if (performance != null) performance.update(detail);
       else created.add(KopisPerformance.create(detail));
     }

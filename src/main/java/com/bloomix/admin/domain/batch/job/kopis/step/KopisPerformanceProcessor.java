@@ -24,7 +24,7 @@ public class KopisPerformanceProcessor implements ItemProcessor<KopisPerformance
   @Override
   public KopisPerformanceDetail process(KopisPerformanceListItem item) {
 
-    String performanceId = Objects.requireNonNull(text(item.mt20id()));
+    String performanceId = Objects.requireNonNull(text(item.getMt20id()));
 
     // newOnly: 이미 DB에 저장된 공연 제외
     if (newOnly && kopisPerformanceRepository.existsById(performanceId)) {
@@ -42,11 +42,11 @@ public class KopisPerformanceProcessor implements ItemProcessor<KopisPerformance
   private void validate(String performanceId, KopisPerformanceDetail detail) {
 
     // 공연명, 시작일, 종료일
-    if (text(detail.prfnm()) == null
-        || date(detail.prfpdfrom()) == null
-        || date(detail.prfpdto()) == null) {
+    if (text(detail.getPrfnm()) == null
+        || date(detail.getPrfpdfrom()) == null
+        || date(detail.getPrfpdto()) == null) {
       throw new KopisInvalidDataException(
-        "필수값 누락: " + performanceId + ", prfnm=" + detail.prfnm() + ", prfpdfrom=" + detail.prfpdfrom() + ", prfpdto=" + detail.prfpdto());
+        "필수값 누락: " + performanceId + ", prfnm=" + detail.getPrfnm() + ", prfpdfrom=" + detail.getPrfpdfrom() + ", prfpdto=" + detail.getPrfpdto());
     }
   }
 }
