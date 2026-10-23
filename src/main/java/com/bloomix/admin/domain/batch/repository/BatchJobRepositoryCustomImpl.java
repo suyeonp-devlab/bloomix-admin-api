@@ -47,8 +47,8 @@ public class BatchJobRepositoryCustomImpl implements BatchJobRepositoryCustom {
     // 검색구분 + 키워드
     if (StringUtils.hasText(condition.keyword())) {
       switch (condition.searchType()) {
-        case "jobId" -> builder.and(batchJob.jobId.containsIgnoreCase(condition.keyword()));
-        case "jobName" -> builder.and(batchJob.jobName.containsIgnoreCase(condition.keyword()));
+        case "ID" -> builder.and(batchJob.jobId.containsIgnoreCase(condition.keyword()));
+        case "NAME" -> builder.and(batchJob.jobName.containsIgnoreCase(condition.keyword()));
         case null, default -> { }
       }
     }
