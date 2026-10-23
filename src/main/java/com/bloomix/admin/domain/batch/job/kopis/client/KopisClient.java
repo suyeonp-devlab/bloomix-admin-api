@@ -51,6 +51,7 @@ public class KopisClient {
       .baseUrl(baseUrl)
       .requestFactory(requestFactory)
       .build();
+
     this.serviceKey = serviceKey;
   }
 
