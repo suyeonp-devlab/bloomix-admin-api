@@ -32,9 +32,15 @@ public class KopisClient {
   private static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.BASIC_ISO_DATE;
   private static final int MAX_BODY_LOG_LENGTH = 300;
 
+  // 호출 간격 (KOPIS 제한: IP당 초당 10회 초과 시 서비스 중지 → 초당 5회로 제한)
+  private static final long MIN_INTERVAL_MILLIS = 200;
+
   private final RestClient restClient;
   private final XmlMapper xmlMapper = XmlMapper.builder().build();
   private final String serviceKey;
+
+  // 직전 호출 시각
+  private long lastCalledAt = 0;
 
   public KopisClient(
       @Value("${kopis.base-url}") String baseUrl,
@@ -91,6 +97,9 @@ public class KopisClient {
 
     String requestInfo = path + " " + params;
 
+    // KOPIS 호출 대기
+    throttle();
+
     // KOPIS 호출
     byte[] body;
     try {
@@ -124,5 +133,19 @@ public class KopisClient {
     } catch (JacksonException e) {
       throw new KopisApiException("KOPIS 응답 변환 실패: " + requestInfo + ", body=" + bodyLog, e);
     }
+  }
+
+  /** 직전 호출과 최소 간격 유지 */
+  private synchronized void throttle() {
+    long wait = lastCalledAt + MIN_INTERVAL_MILLIS - System.currentTimeMillis();
+    if (wait > 0) {
+      try {
+        Thread.sleep(wait);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new IllegalStateException("KOPIS 호출 대기 중단", e);
+      }
+    }
+    lastCalledAt = System.currentTimeMillis();
   }
 }
