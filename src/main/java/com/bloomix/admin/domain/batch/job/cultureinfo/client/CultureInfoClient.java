@@ -1,6 +1,7 @@
 package com.bloomix.admin.domain.batch.job.cultureinfo.client;
 
 import com.bloomix.admin.domain.batch.job.cultureinfo.CultureInfoApiException;
+import com.bloomix.admin.domain.batch.job.cultureinfo.CultureInfoQuotaExceededException;
 import com.bloomix.admin.domain.batch.job.cultureinfo.dto.CultureInfoDetail;
 import com.bloomix.admin.domain.batch.job.cultureinfo.dto.CultureInfoListItem;
 import com.bloomix.admin.domain.batch.job.cultureinfo.dto.CulturePlaceDetail;
@@ -14,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
@@ -33,7 +33,13 @@ public class CultureInfoClient {
   private static final int MAX_BODY_LOG_LENGTH = 300;
 
   // 정상 응답코드
-  private static final Set<String> SUCCESS_CODES = Set.of("00", "0000");
+  private static final String SUCCESS_CODE = "00";
+
+  // 일일 호출 한도 초과 응답코드
+  private static final String QUOTA_EXCEEDED_CODE = "22";
+
+  // 호출 간격 (공공데이터포털 초당 호출 제한 대비 → 초당 5회로 제한)
+  private static final long MIN_INTERVAL_MILLIS = 200;
 
   // 한눈에보는문화정보조회 서비스
   private final RestClient infoClient;
@@ -43,6 +49,9 @@ public class CultureInfoClient {
 
   private final XmlMapper xmlMapper = XmlMapper.builder().build();
   private final String serviceKey;
+
+  // 직전 호출 시각
+  private long lastCalledAt = 0;
 
   public CultureInfoClient(
       @Value("${culture-info.base-url}") String baseUrl,
@@ -111,6 +120,9 @@ public class CultureInfoClient {
 
     String requestInfo = path + " " + params;
 
+    // 문화정보원 호출 대기
+    throttle();
+
     // 문화정보원 호출
     byte[] body;
     try {
@@ -148,10 +160,28 @@ public class CultureInfoClient {
 
     // 응답코드 확인
     String resultCode = response.resultCode();
-    if (resultCode == null || !SUCCESS_CODES.contains(resultCode)) {
+    if (QUOTA_EXCEEDED_CODE.equals(resultCode)) {
+      throw new CultureInfoQuotaExceededException("문화정보원 일일 호출 한도 초과: " + requestInfo);
+    }
+
+    if (!SUCCESS_CODE.equals(resultCode)) {
       throw new CultureInfoApiException("문화정보원 오류 응답: " + requestInfo + ", resultCode=" + resultCode + ", resultMsg=" + response.resultMsg());
     }
 
     return response.items();
+  }
+
+  /** 직전 호출과 최소 간격 유지 */
+  private synchronized void throttle() {
+    long wait = lastCalledAt + MIN_INTERVAL_MILLIS - System.currentTimeMillis();
+    if (wait > 0) {
+      try {
+        Thread.sleep(wait);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new IllegalStateException("문화정보원 호출 대기 중단", e);
+      }
+    }
+    lastCalledAt = System.currentTimeMillis();
   }
 }
