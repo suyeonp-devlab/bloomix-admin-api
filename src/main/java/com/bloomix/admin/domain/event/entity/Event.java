@@ -1,6 +1,7 @@
 package com.bloomix.admin.domain.event.entity;
 
 import com.bloomix.admin.domain.BaseEntity;
+import com.bloomix.admin.domain.batch.job.eventsync.dto.EventSyncData;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -81,4 +82,33 @@ public class Event extends BaseEntity {
 
   // 출처 반영일시
   private LocalDateTime sourceSyncedAt;
+
+  // 행사 생성
+  public static Event create(EventSyncData data) {
+    Event entity = new Event();
+    entity.sourceType = data.getSourceType();
+    entity.sourceId = data.getSourceId();
+    entity.enabled = true;
+    entity.update(data);
+    return entity;
+  }
+
+  // 행사 갱신
+  public void update(EventSyncData data) {
+    this.category = data.getCategory();
+    this.genreName = data.getGenreName();
+    this.title = data.getTitle();
+    this.startDate = data.getStartDate();
+    this.endDate = data.getEndDate();
+    this.venueId = data.getVenueId();
+    this.posterUrl = data.getPosterUrl();
+    this.introImages = data.getIntroImages();
+    this.priceText = data.getPriceText();
+    this.description = data.getDescription();
+    this.castMembers = data.getCastMembers();
+    this.runtime = data.getRuntime();
+    this.ageLimit = data.getAgeLimit();
+    this.verified = this.verified || this.venueId != null;
+    this.sourceSyncedAt = LocalDateTime.now();
+  }
 }
