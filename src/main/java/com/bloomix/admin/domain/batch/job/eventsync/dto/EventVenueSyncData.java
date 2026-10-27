@@ -1,5 +1,8 @@
 package com.bloomix.admin.domain.batch.job.eventsync.dto;
 
+import static com.bloomix.admin.util.StringUtil.unescapeHtml;
+
+import com.bloomix.admin.domain.batch.job.cultureinfo.entity.CultureInfo;
 import com.bloomix.admin.domain.batch.job.cultureinfo.entity.CulturePlace;
 import com.bloomix.admin.domain.batch.job.eventsync.EventRegionParser;
 import com.bloomix.admin.domain.batch.job.kopis.entity.KopisFacility;
@@ -31,7 +34,8 @@ public class EventVenueSyncData {
     data.sourceType = EventSourceType.KOPIS;
     data.sourceId = facility.getFacilityId();
     data.name = facility.getName();
-    data.setAddress(facility.getAddress());
+    data.address = facility.getAddress();
+    data.setRegion(data.address);
     data.latitude = facility.getLatitude();
     data.longitude = facility.getLongitude();
     data.phone = facility.getPhone();
@@ -45,8 +49,9 @@ public class EventVenueSyncData {
     EventVenueSyncData data = new EventVenueSyncData();
     data.sourceType = EventSourceType.CULTURE_INFO;
     data.sourceId = place.getPlaceSeq();
-    data.name = place.getName();
-    data.setAddress(place.getAddress());
+    data.name = unescapeHtml(place.getName());
+    data.address = unescapeHtml(place.getAddress());
+    data.setRegion(data.address);
     data.latitude = place.getLatitude();
     data.longitude = place.getLongitude();
     data.phone = place.getPhone();
@@ -54,10 +59,21 @@ public class EventVenueSyncData {
     return data;
   }
 
-  // 주소 + 시도 + 시군구 세팅
-  private void setAddress(String address) {
-    this.address = address;
-    this.sidoCode = EventRegionParser.sidoCode(address);
-    this.sigungu = sidoCode == null ? null : EventRegionParser.sigungu(address);
+  /** 문화정보원 문화정보 (문화예술공간이 없는 행사) */
+  public static EventVenueSyncData from(CultureInfo info) {
+    EventVenueSyncData data = new EventVenueSyncData();
+    data.sourceType = EventSourceType.CULTURE_INFO_UNREGISTERED;
+    data.sourceId = info.getSeq();
+    data.name = unescapeHtml(info.getPlace());
+    data.setRegion(info.getArea() + " " + info.getSigungu());
+    data.latitude = info.getLatitude();
+    data.longitude = info.getLongitude();
+    return data;
+  }
+
+  // 시도 + 시군구 세팅
+  private void setRegion(String region) {
+    this.sidoCode = EventRegionParser.sidoCode(region);
+    this.sigungu = sidoCode == null ? null : EventRegionParser.sigungu(region);
   }
 }

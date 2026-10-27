@@ -1,5 +1,7 @@
 package com.bloomix.admin.domain.batch.job.eventsync.dto;
 
+import static com.bloomix.admin.util.StringUtil.unescapeHtml;
+
 import com.bloomix.admin.domain.batch.job.cultureinfo.entity.CultureInfo;
 import com.bloomix.admin.domain.batch.job.kopis.entity.KopisPerformance;
 import com.bloomix.admin.domain.event.entity.EventCategory;
@@ -57,14 +59,14 @@ public class EventSyncData {
     data.sourceType = EventSourceType.CULTURE_INFO;
     data.sourceId = info.getSeq();
     data.category = category(info.getServiceType());
-    data.genreName = info.getRealmName();
-    data.title = info.getTitle();
+    data.genreName = unescapeHtml(info.getRealmName());
+    data.title = unescapeHtml(info.getTitle());
     data.startDate = info.getStartDate();
     data.endDate = info.getEndDate();
     data.venueId = venueId;
     data.posterUrl = info.getImageUrl() != null ? info.getImageUrl() : info.getThumbnailUrl();
-    data.priceText = info.getPriceText();
-    data.description = info.getContents();
+    data.priceText = unescapeHtml(info.getPriceText());
+    data.description = unescapeHtml(info.getContents());
     return data;
   }
 

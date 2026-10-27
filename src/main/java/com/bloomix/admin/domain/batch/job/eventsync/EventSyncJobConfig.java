@@ -24,6 +24,7 @@ import org.springframework.batch.infrastructure.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -214,11 +215,26 @@ public class EventSyncJobConfig {
       List<String> ids = Collections.unmodifiableList(chunk.getItems());
       List<CultureInfo> infos = cultureInfoRepository.findAllById(ids);
 
-      Map<String, Long> venueIds = findVenueIds(eventVenueRepository, EventSourceType.CULTURE_INFO,
+      // 문화예술공간이 없는 문화정보 > 문화정보의 장소명 & 지역으로 장소 생성
+      List<EventVenueSyncData> infoVenues = infos.stream()
+          .filter(info -> !hasCulturePlace(info) && StringUtils.hasText(info.getPlace()))
+          .map(EventVenueSyncData::from)
+          .toList();
+
+      saveVenues(eventVenueRepository, EventSourceType.CULTURE_INFO_UNREGISTERED, infoVenues);
+
+      // 행사 장소ID 조회 (CULTURE_INFO, CULTURE_INFO_UNREGISTERED)
+      Map<String, Long> placeVenueIds = findVenueIds(eventVenueRepository, EventSourceType.CULTURE_INFO,
           infos.stream().map(CultureInfo::getPlaceSeq).toList());
 
+      Map<String, Long> infoVenueIds = findVenueIds(eventVenueRepository, EventSourceType.CULTURE_INFO_UNREGISTERED,
+          infoVenues.stream().map(EventVenueSyncData::getSourceId).toList());
+
+      // 문화정보와 행사 장소ID 연결
       List<EventSyncData> data = infos.stream()
-          .map(info -> EventSyncData.of(info, venueIds.get(info.getPlaceSeq())))
+          .map(info -> EventSyncData.of(info, hasCulturePlace(info)
+              ? placeVenueIds.get(info.getPlaceSeq())
+              : infoVenueIds.get(info.getSeq())))
           .toList();
 
       saveEvents(eventRepository, EventSourceType.CULTURE_INFO, data);
@@ -227,6 +243,8 @@ public class EventSyncJobConfig {
 
   /** 행사 장소 저장 및 수정 */
   private static void saveVenues(EventVenueRepository eventVenueRepository, EventSourceType sourceType, List<EventVenueSyncData> data) {
+
+    if (data.isEmpty()) return;
 
     Map<String, EventVenue> existing = eventVenueRepository
         .findAllBySourceTypeAndSourceIdIn(sourceType, data.stream().map(EventVenueSyncData::getSourceId).toList()).stream()
@@ -244,6 +262,8 @@ public class EventSyncJobConfig {
 
   /** 행사 저장 및 수정 */
   private static void saveEvents(EventRepository eventRepository, EventSourceType sourceType, List<EventSyncData> data) {
+
+    if (data.isEmpty()) return;
 
     Map<String, Event> existing = eventRepository
         .findAllBySourceTypeAndSourceIdIn(sourceType, data.stream().map(EventSyncData::getSourceId).toList()).stream()
@@ -267,5 +287,10 @@ public class EventSyncJobConfig {
 
     return eventVenueRepository.findAllBySourceTypeAndSourceIdIn(sourceType, ids).stream()
         .collect(Collectors.toMap(EventVenue::getSourceId, EventVenue::getVenueId));
+  }
+
+  /** 문화예술공간 연결 여부 (문화정보원은 공간이 없으면 "0") */
+  private static boolean hasCulturePlace(CultureInfo info) {
+    return StringUtils.hasText(info.getPlaceSeq()) && !"0".equals(info.getPlaceSeq());
   }
 }
