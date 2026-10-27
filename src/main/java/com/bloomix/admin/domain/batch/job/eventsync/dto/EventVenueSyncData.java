@@ -8,9 +8,13 @@ import com.bloomix.admin.domain.batch.job.eventsync.EventRegionParser;
 import com.bloomix.admin.domain.batch.job.kopis.entity.KopisFacility;
 import com.bloomix.admin.domain.event.entity.EventSourceType;
 import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -64,8 +68,14 @@ public class EventVenueSyncData {
     EventVenueSyncData data = new EventVenueSyncData();
     data.sourceType = EventSourceType.CULTURE_INFO_UNREGISTERED;
     data.sourceId = info.getSeq();
-    data.name = unescapeHtml(info.getPlace());
-    data.setRegion(info.getArea() + " " + info.getSigungu());
+
+    // 지역 문자열 (장소명 대체값)
+    String region = Stream.of(info.getArea(), info.getSigungu())
+      .filter(Objects::nonNull)
+      .collect(Collectors.joining(" "));
+
+    data.name = StringUtils.hasText(info.getPlace()) ? unescapeHtml(info.getPlace()) : region;
+    data.setRegion(region);
     data.latitude = info.getLatitude();
     data.longitude = info.getLongitude();
     return data;

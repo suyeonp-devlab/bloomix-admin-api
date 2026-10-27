@@ -217,7 +217,7 @@ public class EventSyncJobConfig {
 
       // 문화예술공간이 없는 문화정보 > 문화정보의 장소명 & 지역으로 장소 생성
       List<EventVenueSyncData> infoVenues = infos.stream()
-          .filter(info -> !hasCulturePlace(info) && StringUtils.hasText(info.getPlace()))
+          .filter(info -> !hasCulturePlace(info) && (StringUtils.hasText(info.getPlace()) || StringUtils.hasText(info.getArea())))
           .map(EventVenueSyncData::from)
           .toList();
 
