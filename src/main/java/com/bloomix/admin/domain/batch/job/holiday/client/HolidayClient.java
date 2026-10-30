@@ -2,7 +2,7 @@ package com.bloomix.admin.domain.batch.job.holiday.client;
 
 import com.bloomix.admin.domain.batch.job.holiday.HolidayApiException;
 import com.bloomix.admin.domain.batch.job.holiday.dto.HolidayItem;
-import com.bloomix.admin.domain.batch.job.holiday.dto.HolidayResponse;
+import com.bloomix.admin.domain.batch.job.holiday.dto.HolidayApiResponse;
 import com.bloomix.admin.util.StringUtil;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -89,9 +89,9 @@ public class HolidayClient {
     }
 
     // XML 변환
-    HolidayResponse response;
+    HolidayApiResponse response;
     try {
-      response = xmlMapper.readValue(body, HolidayResponse.class);
+      response = xmlMapper.readValue(body, HolidayApiResponse.class);
     } catch (JacksonException e) {
       throw new HolidayApiException("특일 정보 응답 변환 실패: " + requestInfo + ", body=" + bodyLog, e);
     }

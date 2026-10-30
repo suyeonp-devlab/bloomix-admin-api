@@ -10,7 +10,7 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 /** 한국천문연구원 특일 정보 응답 */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
-public class HolidayResponse {
+public class HolidayApiResponse {
 
   private Header header;  // 응답 헤더
   private Body body;      // 응답 본문

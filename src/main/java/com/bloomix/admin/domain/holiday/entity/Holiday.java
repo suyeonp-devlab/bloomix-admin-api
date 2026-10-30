@@ -1,4 +1,4 @@
-package com.bloomix.admin.domain.batch.job.holiday.entity;
+package com.bloomix.admin.domain.holiday.entity;
 
 import com.bloomix.admin.domain.BaseEntity;
 import jakarta.persistence.Entity;

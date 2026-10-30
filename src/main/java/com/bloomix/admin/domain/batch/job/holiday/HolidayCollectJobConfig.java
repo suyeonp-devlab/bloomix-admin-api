@@ -2,8 +2,8 @@ package com.bloomix.admin.domain.batch.job.holiday;
 
 import com.bloomix.admin.domain.batch.job.holiday.client.HolidayClient;
 import com.bloomix.admin.domain.batch.job.holiday.dto.HolidayItem;
-import com.bloomix.admin.domain.batch.job.holiday.entity.Holiday;
-import com.bloomix.admin.domain.batch.job.holiday.repository.HolidayRepository;
+import com.bloomix.admin.domain.holiday.entity.Holiday;
+import com.bloomix.admin.domain.holiday.repository.HolidayRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
