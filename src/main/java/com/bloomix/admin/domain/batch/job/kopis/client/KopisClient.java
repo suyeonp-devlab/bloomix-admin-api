@@ -19,17 +19,17 @@ import tools.jackson.dataformat.xml.XmlMapper;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.bloomix.admin.util.DateUtil.YYYYMMDD;
+
 /** KOPIS OPEN API 클라이언트: 공연목록, 공연상세, 공연시설상세 */
 @Component
 public class KopisClient {
 
-  private static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.BASIC_ISO_DATE;
   private static final int MAX_BODY_LOG_LENGTH = 300;
 
   // 호출 간격 (KOPIS 제한: IP당 초당 10회 초과 시 서비스 중지 → 초당 5회로 제한)

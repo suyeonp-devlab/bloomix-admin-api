@@ -9,7 +9,7 @@ import java.time.format.DateTimeParseException;
 public final class DateUtil {
 
   public static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.BASIC_ISO_DATE;
-  public static final DateTimeFormatter Hmm = DateTimeFormatter.ofPattern("H:mm");
+  public static final DateTimeFormatter HMM = DateTimeFormatter.ofPattern("H:mm");
 
   private DateUtil() {
   }

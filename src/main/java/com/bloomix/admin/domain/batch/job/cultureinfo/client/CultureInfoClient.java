@@ -1,5 +1,7 @@
 package com.bloomix.admin.domain.batch.job.cultureinfo.client;
 
+import static com.bloomix.admin.util.DateUtil.YYYYMMDD;
+
 import com.bloomix.admin.domain.batch.job.cultureinfo.CultureInfoApiException;
 import com.bloomix.admin.domain.batch.job.cultureinfo.CultureInfoQuotaExceededException;
 import com.bloomix.admin.domain.batch.job.cultureinfo.dto.CultureInfoDetail;
@@ -10,7 +12,6 @@ import com.bloomix.admin.util.StringUtil;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import tools.jackson.dataformat.xml.XmlMapper;
 @Component
 public class CultureInfoClient {
 
-  private static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.BASIC_ISO_DATE;
   private static final int MAX_BODY_LOG_LENGTH = 300;
 
   // 정상 응답코드

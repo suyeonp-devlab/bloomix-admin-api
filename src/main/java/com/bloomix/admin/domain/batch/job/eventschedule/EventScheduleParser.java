@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.util.StringUtils;
 
-import static com.bloomix.admin.util.DateUtil.Hmm;
+import static com.bloomix.admin.util.DateUtil.HMM;
 
 /** 공연시간 문구 변환 */
 public final class EventScheduleParser {
@@ -80,7 +80,7 @@ public final class EventScheduleParser {
   /** 쉼표로 구분된 시간 목록 */
   private static List<LocalTime> times(String text) {
     return Arrays.stream(text.split("\\s*,\\s*"))
-        .map(time -> LocalTime.parse(time, Hmm))
+        .map(time -> LocalTime.parse(time, HMM))
         .toList();
   }
 

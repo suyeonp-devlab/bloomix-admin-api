@@ -1,15 +1,14 @@
 package com.bloomix.admin.domain.batch.job.cultureinfo;
 
+import static com.bloomix.admin.util.DateUtil.YYYYMMDD;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import org.springframework.util.StringUtils;
 
 /** 문화정보원 연동 응답 값 변환 */
 public final class CultureInfoValueParser {
-
-  private static final DateTimeFormatter YYYYMMDD = DateTimeFormatter.BASIC_ISO_DATE;
 
   private CultureInfoValueParser() {
   }
