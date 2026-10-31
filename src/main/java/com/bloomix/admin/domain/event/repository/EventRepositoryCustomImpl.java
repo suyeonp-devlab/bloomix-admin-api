@@ -6,6 +6,7 @@ import static com.bloomix.admin.domain.event.entity.QEvent.event;
 
 import com.bloomix.admin.domain.event.entity.EventSourceType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -48,6 +49,23 @@ public class EventRepositoryCustomImpl implements EventRepositoryCustom {
             event.eventId.isNull().or(cultureInfo.updatedAt.gt(event.sourceCheckedAt))
         )
         .orderBy(cultureInfo.seq.asc())
+        .fetch();
+  }
+
+  @Override
+  public List<Long> findEventIdsToGenerateSchedule(LocalDate from, LocalDate to) {
+
+    return queryFactory
+        .select(event.eventId)
+        .from(event)
+        .where(
+            event.enabled.isTrue(),
+            event.onSale.isTrue(),
+            event.verified.isTrue(),
+            event.startDate.loe(to),
+            event.endDate.goe(from)
+        )
+        .orderBy(event.eventId.asc())
         .fetch();
   }
 }
