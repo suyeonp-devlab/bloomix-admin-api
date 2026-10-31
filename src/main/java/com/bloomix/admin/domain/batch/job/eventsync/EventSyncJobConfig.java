@@ -5,14 +5,12 @@ import com.bloomix.admin.domain.batch.job.cultureinfo.repository.CultureInfoRepo
 import com.bloomix.admin.domain.batch.job.cultureinfo.repository.CulturePlaceRepository;
 import com.bloomix.admin.domain.batch.job.eventsync.dto.EventSyncData;
 import com.bloomix.admin.domain.batch.job.eventsync.dto.EventVenueSyncData;
+import com.bloomix.admin.domain.batch.job.kopis.entity.KopisFacility;
 import com.bloomix.admin.domain.batch.job.kopis.entity.KopisPerformance;
 import com.bloomix.admin.domain.batch.job.kopis.repository.KopisFacilityRepository;
 import com.bloomix.admin.domain.batch.job.kopis.repository.KopisPerformanceRepository;
-import com.bloomix.admin.domain.event.entity.Event;
-import com.bloomix.admin.domain.event.entity.EventSourceType;
-import com.bloomix.admin.domain.event.entity.EventVenue;
-import com.bloomix.admin.domain.event.repository.EventRepository;
-import com.bloomix.admin.domain.event.repository.EventVenueRepository;
+import com.bloomix.admin.domain.event.entity.*;
+import com.bloomix.admin.domain.event.repository.*;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -154,7 +152,8 @@ public class EventSyncJobConfig {
   @Bean
   public ItemWriter<String> kopisVenueSyncWriter(
       KopisFacilityRepository kopisFacilityRepository,
-      EventVenueRepository eventVenueRepository
+      EventVenueRepository eventVenueRepository,
+      EventVenueHistoryRepository eventVenueHistoryRepository
   ) {
     return chunk -> {
       List<String> ids = Collections.unmodifiableList(chunk.getItems());
@@ -162,7 +161,7 @@ public class EventSyncJobConfig {
           .map(EventVenueSyncData::from)
           .toList();
 
-      saveVenues(eventVenueRepository, EventSourceType.KOPIS, data);
+      saveVenues(eventVenueRepository, eventVenueHistoryRepository, EventSourceType.KOPIS, data);
     };
   }
 
@@ -170,7 +169,8 @@ public class EventSyncJobConfig {
   @Bean
   public ItemWriter<String> cultureVenueSyncWriter(
       CulturePlaceRepository culturePlaceRepository,
-      EventVenueRepository eventVenueRepository
+      EventVenueRepository eventVenueRepository,
+      EventVenueHistoryRepository eventVenueHistoryRepository
   ) {
     return chunk -> {
       List<String> ids = Collections.unmodifiableList(chunk.getItems());
@@ -178,7 +178,7 @@ public class EventSyncJobConfig {
           .map(EventVenueSyncData::from)
           .toList();
 
-      saveVenues(eventVenueRepository, EventSourceType.CULTURE_INFO, data);
+      saveVenues(eventVenueRepository, eventVenueHistoryRepository, EventSourceType.CULTURE_INFO, data);
     };
   }
 
@@ -186,21 +186,37 @@ public class EventSyncJobConfig {
   @Bean
   public ItemWriter<String> kopisEventSyncWriter(
       KopisPerformanceRepository kopisPerformanceRepository,
+      KopisFacilityRepository kopisFacilityRepository,
       EventVenueRepository eventVenueRepository,
-      EventRepository eventRepository
+      EventRepository eventRepository,
+      EventHistoryRepository eventHistoryRepository,
+      EventSourceChangeRepository eventSourceChangeRepository
   ) {
     return chunk -> {
       List<String> ids = Collections.unmodifiableList(chunk.getItems());
       List<KopisPerformance> performances = kopisPerformanceRepository.findAllById(ids);
 
-      Map<String, Long> venueIds = findVenueIds(eventVenueRepository, EventSourceType.KOPIS,
-          performances.stream().map(KopisPerformance::getFacilityId).toList());
-
-      List<EventSyncData> data = performances.stream()
-          .map(performance -> EventSyncData.of(performance, venueIds.get(performance.getFacilityId())))
+      List<String> facilityIds = performances.stream()
+          .map(KopisPerformance::getFacilityId)
+          .filter(Objects::nonNull)
+          .distinct()
           .toList();
 
-      saveEvents(eventRepository, EventSourceType.KOPIS, data);
+      // 공연시설 조회
+      Map<String, KopisFacility> facilities = kopisFacilityRepository.findAllById(facilityIds).stream()
+          .collect(Collectors.toMap(KopisFacility::getFacilityId, Function.identity()));
+
+      // 행사 장소ID 조회
+      Map<String, Long> venueIds = findVenueIds(eventVenueRepository, EventSourceType.KOPIS, facilityIds);
+
+      List<EventSyncData> data = performances.stream()
+          .map(performance -> EventSyncData.of(
+              performance,
+              facilities.get(performance.getFacilityId()),
+              venueIds.get(performance.getFacilityId())))
+          .toList();
+
+      saveEvents(eventRepository, eventHistoryRepository, eventSourceChangeRepository, EventSourceType.KOPIS, data);
     };
   }
 
@@ -209,7 +225,10 @@ public class EventSyncJobConfig {
   public ItemWriter<String> cultureEventSyncWriter(
       CultureInfoRepository cultureInfoRepository,
       EventVenueRepository eventVenueRepository,
-      EventRepository eventRepository
+      EventVenueHistoryRepository eventVenueHistoryRepository,
+      EventRepository eventRepository,
+      EventHistoryRepository eventHistoryRepository,
+      EventSourceChangeRepository eventSourceChangeRepository
   ) {
     return chunk -> {
       List<String> ids = Collections.unmodifiableList(chunk.getItems());
@@ -221,7 +240,7 @@ public class EventSyncJobConfig {
           .map(EventVenueSyncData::from)
           .toList();
 
-      saveVenues(eventVenueRepository, EventSourceType.CULTURE_INFO_UNREGISTERED, infoVenues);
+      saveVenues(eventVenueRepository, eventVenueHistoryRepository, EventSourceType.CULTURE_INFO_UNREGISTERED, infoVenues);
 
       // 행사 장소ID 조회 (CULTURE_INFO, CULTURE_INFO_UNREGISTERED)
       Map<String, Long> placeVenueIds = findVenueIds(eventVenueRepository, EventSourceType.CULTURE_INFO,
@@ -237,46 +256,100 @@ public class EventSyncJobConfig {
               : infoVenueIds.get(info.getSeq())))
           .toList();
 
-      saveEvents(eventRepository, EventSourceType.CULTURE_INFO, data);
+      saveEvents(eventRepository, eventHistoryRepository, eventSourceChangeRepository, EventSourceType.CULTURE_INFO, data);
     };
   }
 
-  /** 행사 장소 저장 및 수정 */
-  private static void saveVenues(EventVenueRepository eventVenueRepository, EventSourceType sourceType, List<EventVenueSyncData> data) {
+  /** 행사 장소 저장 */
+  private static void saveVenues(
+      EventVenueRepository eventVenueRepository,
+      EventVenueHistoryRepository eventVenueHistoryRepository,
+      EventSourceType sourceType,
+      List<EventVenueSyncData> data
+  ) {
 
     if (data.isEmpty()) return;
 
-    Map<String, EventVenue> existing = eventVenueRepository
+    Set<String> existing = eventVenueRepository
         .findAllBySourceTypeAndSourceIdIn(sourceType, data.stream().map(EventVenueSyncData::getSourceId).toList()).stream()
-        .collect(Collectors.toMap(EventVenue::getSourceId, Function.identity()));
+        .map(EventVenue::getSourceId)
+        .collect(Collectors.toSet());
 
-    List<EventVenue> created = new ArrayList<>();
-    for (EventVenueSyncData item : data) {
-      EventVenue venue = existing.get(item.getSourceId());
-      if (venue != null) venue.update(item);
-      else created.add(EventVenue.create(item));
-    }
+    // 신규 장소 추출
+    List<EventVenue> created = data.stream()
+        .filter(item -> !existing.contains(item.getSourceId()))
+        .map(EventVenue::create)
+        .toList();
 
-    eventVenueRepository.saveAll(created);
+    // 신규 장소 저장 및 이력 생성
+    List<EventVenueHistory> histories = eventVenueRepository.saveAll(created).stream()
+        .map(EventVenueHistory::create)
+        .toList();
+
+    eventVenueHistoryRepository.saveAll(histories);
   }
 
-  /** 행사 저장 및 수정 */
-  private static void saveEvents(EventRepository eventRepository, EventSourceType sourceType, List<EventSyncData> data) {
+  /** 행사 저장 */
+  private static void saveEvents(
+      EventRepository eventRepository,
+      EventHistoryRepository eventHistoryRepository,
+      EventSourceChangeRepository eventSourceChangeRepository,
+      EventSourceType sourceType,
+      List<EventSyncData> data
+  ) {
 
     if (data.isEmpty()) return;
 
     Map<String, Event> existing = eventRepository
         .findAllBySourceTypeAndSourceIdIn(sourceType, data.stream().map(EventSyncData::getSourceId).toList()).stream()
         .collect(Collectors.toMap(Event::getSourceId, Function.identity()));
+    
+    Map<Long, EventSourceChange> pending = findPendingChanges(eventSourceChangeRepository, existing.values());
 
+    // 신규 행사 추출 + 기존 행사 변경 감지
     List<Event> created = new ArrayList<>();
+    List<EventSourceChange> changes = new ArrayList<>();
     for (EventSyncData item : data) {
       Event event = existing.get(item.getSourceId());
-      if (event != null) event.update(item);
-      else created.add(Event.create(item));
+      if (event == null) {
+        created.add(Event.create(item));
+        continue;
+      }
+
+      event.markChecked();
+
+      // 기존 행사 중 원본 기간·장소가 다르면 변경 후보 기록
+      EventSourceChange change = pending.get(event.getEventId());
+      if (event.isChangedBy(item)) {
+        if (change != null) change.update(item);
+        else changes.add(EventSourceChange.create(event.getEventId(), item));
+      } else if (change != null) {
+        // 원본이 현재 값으로 돌아오면 대기 중인 후보 정리
+        change.ignore();
+      }
     }
 
-    eventRepository.saveAll(created);
+    // 신규 행사 저장 및 이력 저장
+    List<EventHistory> histories = eventRepository.saveAll(created).stream()
+        .map(EventHistory::create)
+        .toList();
+
+    eventHistoryRepository.saveAll(histories);
+    eventSourceChangeRepository.saveAll(changes);
+  }
+
+  /** 행사ID별 대기 중인 변경 후보 조회 */
+  private static Map<Long, EventSourceChange> findPendingChanges(
+      EventSourceChangeRepository eventSourceChangeRepository,
+      Collection<Event> events
+  ) {
+
+    if (events.isEmpty()) return Map.of();
+
+    List<Long> eventIds = events.stream().map(Event::getEventId).toList();
+
+    return eventSourceChangeRepository.findAllByEventIdInAndStatus(eventIds, EventSourceChangeStatus.PENDING).stream()
+        .collect(Collectors.toMap(EventSourceChange::getEventId, Function.identity()));
   }
 
   /** 출처 장소ID에 매핑되는 행사 장소ID 조회 */

@@ -17,7 +17,7 @@ public class EventVenueRepositoryCustomImpl implements EventVenueRepositoryCusto
   @Override
   public List<String> findKopisFacilityIdsToSync() {
 
-    // 미반영 또는 변경 건
+    // 미반영 건
     return queryFactory
         .select(kopisFacility.facilityId)
         .from(kopisFacility)
@@ -25,7 +25,7 @@ public class EventVenueRepositoryCustomImpl implements EventVenueRepositoryCusto
             eventVenue.sourceType.eq(EventSourceType.KOPIS),
             eventVenue.sourceId.eq(kopisFacility.facilityId)
         )
-        .where(eventVenue.venueId.isNull().or(kopisFacility.updatedAt.gt(eventVenue.sourceSyncedAt)))
+        .where(eventVenue.venueId.isNull())
         .orderBy(kopisFacility.facilityId.asc())
         .fetch();
   }
@@ -33,7 +33,7 @@ public class EventVenueRepositoryCustomImpl implements EventVenueRepositoryCusto
   @Override
   public List<String> findCulturePlaceSeqsToSync() {
 
-    // 미반영 또는 변경 건
+    // 미반영 건
     return queryFactory
         .select(culturePlace.placeSeq)
         .from(culturePlace)
@@ -41,7 +41,7 @@ public class EventVenueRepositoryCustomImpl implements EventVenueRepositoryCusto
             eventVenue.sourceType.eq(EventSourceType.CULTURE_INFO),
             eventVenue.sourceId.eq(culturePlace.placeSeq)
         )
-        .where(eventVenue.venueId.isNull().or(culturePlace.updatedAt.gt(eventVenue.sourceSyncedAt)))
+        .where(eventVenue.venueId.isNull())
         .orderBy(culturePlace.placeSeq.asc())
         .fetch();
   }

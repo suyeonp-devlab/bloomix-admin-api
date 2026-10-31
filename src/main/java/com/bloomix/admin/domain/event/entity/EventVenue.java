@@ -9,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -60,30 +59,21 @@ public class EventVenue extends BaseEntity {
   // 확인 여부
   private boolean verified;
 
-  // 출처 반영일시
-  private LocalDateTime sourceSyncedAt;
-
   // 장소 생성
   public static EventVenue create(EventVenueSyncData data) {
     EventVenue entity = new EventVenue();
     entity.sourceType = data.getSourceType();
     entity.sourceId = data.getSourceId();
-    entity.update(data);
+    entity.name = data.getName();
+    entity.address = data.getAddress();
+    entity.sidoCode = data.getSidoCode();
+    entity.sigungu = data.getSigungu();
+    entity.latitude = data.getLatitude();
+    entity.longitude = data.getLongitude();
+    entity.phone = data.getPhone();
+    entity.homepageUrl = data.getHomepageUrl();
+    entity.seatScale = data.getSeatScale();
+    entity.verified = data.getSidoCode() != null;
     return entity;
-  }
-
-  // 장소 갱신
-  public void update(EventVenueSyncData data) {
-    this.name = data.getName();
-    this.address = data.getAddress();
-    this.sidoCode = data.getSidoCode();
-    this.sigungu = data.getSigungu();
-    this.latitude = data.getLatitude();
-    this.longitude = data.getLongitude();
-    this.phone = data.getPhone();
-    this.homepageUrl = data.getHomepageUrl();
-    this.seatScale = data.getSeatScale();
-    this.verified = this.verified || data.getSidoCode() != null;
-    this.sourceSyncedAt = LocalDateTime.now();
   }
 }

@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -74,41 +75,62 @@ public class Event extends BaseEntity {
   // 관람연령
   private String ageLimit;
 
+  // 정원
+  private int capacity;
+
+  // 판매 여부
+  private boolean onSale;
+
+  // 판매 중단 사유
+  private String saleStopReason;
+
+  // 판매 중단 일시
+  private LocalDateTime saleStoppedAt;
+
   // 노출 여부
   private boolean enabled;
 
   // 확인 여부
   private boolean verified;
 
-  // 출처 반영일시
-  private LocalDateTime sourceSyncedAt;
+  // 원본 확인 일시
+  private LocalDateTime sourceCheckedAt;
 
   // 행사 생성
   public static Event create(EventSyncData data) {
     Event entity = new Event();
     entity.sourceType = data.getSourceType();
     entity.sourceId = data.getSourceId();
+    entity.category = data.getCategory();
+    entity.genreName = data.getGenreName();
+    entity.title = data.getTitle();
+    entity.startDate = data.getStartDate();
+    entity.endDate = data.getEndDate();
+    entity.venueId = data.getVenueId();
+    entity.posterUrl = data.getPosterUrl();
+    entity.introImages = data.getIntroImages();
+    entity.priceText = data.getPriceText();
+    entity.description = data.getDescription();
+    entity.castMembers = data.getCastMembers();
+    entity.runtime = data.getRuntime();
+    entity.ageLimit = data.getAgeLimit();
+    entity.capacity = data.getCapacity();
+    entity.onSale = true;
     entity.enabled = true;
-    entity.update(data);
+    entity.verified = data.getVenueId() != null;
+    entity.sourceCheckedAt = LocalDateTime.now();
     return entity;
   }
 
-  // 행사 갱신
-  public void update(EventSyncData data) {
-    this.category = data.getCategory();
-    this.genreName = data.getGenreName();
-    this.title = data.getTitle();
-    this.startDate = data.getStartDate();
-    this.endDate = data.getEndDate();
-    this.venueId = data.getVenueId();
-    this.posterUrl = data.getPosterUrl();
-    this.introImages = data.getIntroImages();
-    this.priceText = data.getPriceText();
-    this.description = data.getDescription();
-    this.castMembers = data.getCastMembers();
-    this.runtime = data.getRuntime();
-    this.ageLimit = data.getAgeLimit();
-    this.verified = this.verified || this.venueId != null;
-    this.sourceSyncedAt = LocalDateTime.now();
+  // 원본 변경 여부
+  public boolean isChangedBy(EventSyncData data) {
+    return !this.startDate.equals(data.getStartDate())
+        || !this.endDate.equals(data.getEndDate())
+        || !Objects.equals(this.venueId, data.getVenueId());
+  }
+
+  // 원본 확인 처리
+  public void markChecked() {
+    this.sourceCheckedAt = LocalDateTime.now();
   }
 }

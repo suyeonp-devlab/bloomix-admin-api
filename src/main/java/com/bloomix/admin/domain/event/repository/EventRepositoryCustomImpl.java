@@ -25,7 +25,7 @@ public class EventRepositoryCustomImpl implements EventRepositoryCustom {
             event.sourceType.eq(EventSourceType.KOPIS),
             event.sourceId.eq(kopisPerformance.performanceId)
         )
-        .where(event.eventId.isNull().or(kopisPerformance.updatedAt.gt(event.sourceSyncedAt)))
+        .where(event.eventId.isNull().or(kopisPerformance.updatedAt.gt(event.sourceCheckedAt)))
         .orderBy(kopisPerformance.performanceId.asc())
         .fetch();
   }
@@ -45,7 +45,7 @@ public class EventRepositoryCustomImpl implements EventRepositoryCustom {
         .where(
             cultureInfo.serviceType.eq("A").and(cultureInfo.realmName.eq("전시"))
                 .or(cultureInfo.serviceType.in("B", "C")),
-            event.eventId.isNull().or(cultureInfo.updatedAt.gt(event.sourceSyncedAt))
+            event.eventId.isNull().or(cultureInfo.updatedAt.gt(event.sourceCheckedAt))
         )
         .orderBy(cultureInfo.seq.asc())
         .fetch();
