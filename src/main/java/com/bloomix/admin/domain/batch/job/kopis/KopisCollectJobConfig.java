@@ -53,8 +53,8 @@ public class KopisCollectJobConfig {
   @Bean
   public Job kopisCollectJob(
       JobRepository jobRepository,
-      Step kopisNewPerformanceStep,
       Step kopisChangedPerformanceStep,
+      Step kopisNewPerformanceStep,
       Step kopisFacilityStep
   ) {
     return new JobBuilder(JOB_NAME, jobRepository)

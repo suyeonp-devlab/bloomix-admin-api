@@ -1,0 +1,2 @@
+ALTER TABLE event_venue ALTER COLUMN source_type TYPE VARCHAR(30);
+ALTER TABLE event ALTER COLUMN source_type TYPE VARCHAR(30);
