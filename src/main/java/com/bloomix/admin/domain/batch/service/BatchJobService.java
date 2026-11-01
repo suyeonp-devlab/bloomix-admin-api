@@ -11,6 +11,7 @@ import com.bloomix.admin.domain.batch.repository.BatchJobHistoryRepository;
 import com.bloomix.admin.domain.batch.repository.BatchJobRepository;
 import com.bloomix.admin.domain.batch.support.BatchJobLauncher;
 import com.bloomix.admin.domain.batch.support.BatchJobScheduler;
+import com.bloomix.admin.domain.code.service.CommonCodeService;
 import com.bloomix.admin.exception.BizException;
 import com.bloomix.admin.exception.ErrorCode;
 import com.bloomix.admin.response.PageResponse;
@@ -35,13 +36,18 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Transactional(readOnly = true)
 public class BatchJobService {
 
+  private static final String STATUS_GROUP_CODE = "BATCH_STATUS";
+
   private final BatchJobRepository batchJobRepository;
   private final BatchJobHistoryRepository batchJobHistoryRepository;
   private final BatchJobLauncher batchJobLauncher;
   private final BatchJobScheduler batchJobScheduler;
+  private final CommonCodeService commonCodeService;
 
   /** 배치 목록 조회 */
   public PageResponse<BatchJobResponse> searchJobs(BatchJobListRequest condition, Pageable pageable) {
+
+    Map<String, String> statusNames = commonCodeService.getCodeNameMap(STATUS_GROUP_CODE);
 
     Page<BatchJob> jobs = batchJobRepository.searchJobs(condition, pageable);
 
@@ -51,7 +57,7 @@ public class BatchJobService {
         .collect(Collectors.toMap(BatchJobHistory::getJobId, Function.identity()));
 
     return PageResponse.from(
-      jobs.map(job -> BatchJobResponse.of(job, latestHistories.get(job.getJobId()))));
+      jobs.map(job -> BatchJobResponse.of(job, latestHistories.get(job.getJobId()), statusNames)));
   }
 
   /** 배치 상세 조회 */
@@ -61,7 +67,8 @@ public class BatchJobService {
       .orElseThrow(() -> new BizException(ErrorCode.BATCH_JOB_NOT_FOUND));
 
     return BatchJobResponse.of(job,
-      batchJobHistoryRepository.findFirstByJobIdOrderByStartedAtDescHistoryIdDesc(job.getJobId()).orElse(null));
+      batchJobHistoryRepository.findFirstByJobIdOrderByStartedAtDescHistoryIdDesc(job.getJobId()).orElse(null),
+      commonCodeService.getCodeNameMap(STATUS_GROUP_CODE));
   }
 
   /** 배치 등록 */

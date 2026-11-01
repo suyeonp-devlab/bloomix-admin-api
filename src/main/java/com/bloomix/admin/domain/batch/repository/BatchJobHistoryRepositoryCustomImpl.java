@@ -4,7 +4,6 @@ import static com.bloomix.admin.domain.batch.entity.QBatchJob.batchJob;
 import static com.bloomix.admin.domain.batch.entity.QBatchJobHistory.batchJobHistory;
 
 import com.bloomix.admin.domain.batch.dto.BatchJobHistoryListRequest;
-import com.bloomix.admin.domain.batch.dto.BatchJobHistoryResponse;
 import com.bloomix.admin.domain.batch.entity.BatchJobHistory;
 import com.bloomix.admin.domain.batch.entity.QBatchJobHistory;
 import com.querydsl.core.BooleanBuilder;
@@ -24,22 +23,18 @@ public class BatchJobHistoryRepositoryCustomImpl implements BatchJobHistoryRepos
   private final JPAQueryFactory queryFactory;
 
   @Override
-  public Page<BatchJobHistoryResponse> searchHistories(BatchJobHistoryListRequest condition, Pageable pageable) {
+  public Page<BatchJobHistory> searchHistories(BatchJobHistoryListRequest condition, Pageable pageable) {
 
     BooleanBuilder where = searchHistoriesCondition(condition);
 
-    List<BatchJobHistoryResponse> content = queryFactory
-        .select(batchJobHistory, batchJob.jobName)
-        .from(batchJobHistory)
+    List<BatchJobHistory> content = queryFactory
+        .selectFrom(batchJobHistory)
         .join(batchJob).on(batchJob.jobId.eq(batchJobHistory.jobId))
         .where(where)
         .orderBy(batchJobHistory.startedAt.desc(), batchJobHistory.historyId.desc())
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
-        .fetch()
-        .stream()
-        .map(row -> BatchJobHistoryResponse.of(row.get(batchJobHistory), row.get(batchJob.jobName)))
-        .toList();
+        .fetch();
 
     JPAQuery<Long> countQuery = queryFactory
         .select(batchJobHistory.count())
@@ -75,7 +70,7 @@ public class BatchJobHistoryRepositoryCustomImpl implements BatchJobHistoryRepos
     // 검색구분 + 키워드
     if (StringUtils.hasText(condition.keyword())) {
       switch (condition.searchType()) {
-        case "ID" -> builder.and(batchJobHistory.jobId.containsIgnoreCase(condition.keyword()));
+        case "ID" -> builder.and(batchJobHistory.jobId.eq(condition.keyword()));
         case "NAME" -> builder.and(batchJob.jobName.containsIgnoreCase(condition.keyword()));
         case null, default -> { }
       }
