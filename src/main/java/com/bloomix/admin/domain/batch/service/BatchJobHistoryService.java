@@ -2,10 +2,13 @@ package com.bloomix.admin.domain.batch.service;
 
 import com.bloomix.admin.domain.batch.dto.BatchJobHistoryListRequest;
 import com.bloomix.admin.domain.batch.dto.BatchJobHistoryResponse;
+import com.bloomix.admin.domain.batch.entity.BatchJob;
 import com.bloomix.admin.domain.batch.entity.BatchJobHistory;
 import com.bloomix.admin.domain.batch.entity.BatchStatus;
 import com.bloomix.admin.domain.batch.entity.BatchTriggerType;
 import com.bloomix.admin.domain.batch.repository.BatchJobHistoryRepository;
+import com.bloomix.admin.domain.batch.repository.BatchJobRepository;
+import com.bloomix.admin.domain.code.service.CommonCodeService;
 import com.bloomix.admin.exception.BizException;
 import com.bloomix.admin.exception.ErrorCode;
 import com.bloomix.admin.response.PageResponse;
@@ -15,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.job.JobExecution;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,12 +37,28 @@ public class BatchJobHistoryService {
 
   private static final String SERVER_RESTART_MESSAGE = "서버 재시작으로 중단되었습니다.";
 
+  private static final String TRIGGER_TYPE_GROUP_CODE = "BATCH_TRIGGER_TYPE";
+  private static final String STATUS_GROUP_CODE = "BATCH_STATUS";
+
   private final BatchJobHistoryRepository batchJobHistoryRepository;
+  private final BatchJobRepository batchJobRepository;
+  private final CommonCodeService commonCodeService;
 
   /** 배치 실행 이력 목록 조회 */
   public PageResponse<BatchJobHistoryResponse> searchHistories(BatchJobHistoryListRequest condition, Pageable pageable) {
-    return PageResponse.from(
-      batchJobHistoryRepository.searchHistories(condition, pageable));
+
+    Map<String, String> triggerTypeNames = commonCodeService.getCodeNameMap(TRIGGER_TYPE_GROUP_CODE);
+    Map<String, String> statusNames = commonCodeService.getCodeNameMap(STATUS_GROUP_CODE);
+
+    Page<BatchJobHistory> histories = batchJobHistoryRepository.searchHistories(condition, pageable);
+
+    // 배치명
+    List<String> jobIds = histories.getContent().stream().map(BatchJobHistory::getJobId).distinct().toList();
+    Map<String, String> jobNames = batchJobRepository.findAllById(jobIds).stream()
+        .collect(Collectors.toMap(BatchJob::getJobId, BatchJob::getJobName));
+
+    return PageResponse.from(histories.map(history -> BatchJobHistoryResponse.of(
+        history, jobNames.get(history.getJobId()), triggerTypeNames, statusNames)));
   }
 
   /** 배치 실행 이력 생성 (RUNNING) */
