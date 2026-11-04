@@ -58,4 +58,9 @@ public class EventSourceChange extends BaseEntity {
   public void ignore() {
     this.status = EventSourceChangeStatus.IGNORED;
   }
+
+  // 변경 후보 반영 처리
+  public void apply() {
+    this.status = EventSourceChangeStatus.APPLIED;
+  }
 }

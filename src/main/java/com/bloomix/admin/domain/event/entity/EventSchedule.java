@@ -1,6 +1,7 @@
 package com.bloomix.admin.domain.event.entity;
 
 import com.bloomix.admin.domain.BaseEntity;
+import com.bloomix.admin.domain.event.dto.EventScheduleRequest;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -44,5 +45,26 @@ public class EventSchedule extends BaseEntity {
     entity.capacity = event.getCapacity();
     entity.enabled = true;
     return entity;
+  }
+
+  // 회차 등록
+  public static EventSchedule create(Long eventId, EventScheduleRequest request) {
+    EventSchedule entity = new EventSchedule();
+    entity.eventId = eventId;
+    entity.update(request);
+    return entity;
+  }
+
+  // 회차 수정
+  public void update(EventScheduleRequest request) {
+    this.scheduleDate = request.scheduleDate();
+    this.startTime = request.startTime();
+    this.capacity = request.capacity();
+    this.enabled = request.enabled();
+  }
+
+  // 회차 사용 중지
+  public void disable() {
+    this.enabled = false;
   }
 }

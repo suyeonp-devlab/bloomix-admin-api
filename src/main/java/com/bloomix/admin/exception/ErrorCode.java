@@ -37,7 +37,15 @@ public enum ErrorCode {
   BATCH_LAUNCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "BATCH_004", "배치 실행을 시작하지 못했습니다."),
   BATCH_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "BATCH_005", "실행 이력을 찾을 수 없습니다."),
   BATCH_RESTART_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "BATCH_006", "재시작할 수 없는 실행 이력입니다. 가장 최근에 실패한 실행만 재시작할 수 있습니다."),
-  DUPLICATE_BATCH_JOB(HttpStatus.CONFLICT, "BATCH_007", "이미 등록된 배치입니다.");
+  DUPLICATE_BATCH_JOB(HttpStatus.CONFLICT, "BATCH_007", "이미 등록된 배치입니다."),
+
+  EVENT_NOT_FOUND(HttpStatus.NOT_FOUND, "EVENT_001", "행사를 찾을 수 없습니다."),
+  INVALID_EVENT_SALE_CHANGE(HttpStatus.BAD_REQUEST, "EVENT_002", "변경할 수 없는 판매 상태입니다."),
+  EVENT_SOURCE_CHANGE_NOT_FOUND(HttpStatus.NOT_FOUND, "EVENT_003", "원본 변경 후보를 찾을 수 없습니다."),
+  EVENT_SOURCE_CHANGE_ALREADY_PROCESSED(HttpStatus.CONFLICT, "EVENT_004", "이미 처리된 원본 변경 후보입니다. 다시 조회해주세요."),
+  EVENT_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "EVENT_005", "회차를 찾을 수 없습니다."),
+  DUPLICATE_EVENT_SCHEDULE(HttpStatus.CONFLICT, "EVENT_006", "같은 날짜와 시작 시간의 회차가 이미 있습니다."),
+  EVENT_VENUE_NOT_FOUND(HttpStatus.NOT_FOUND, "EVENT_007", "장소를 찾을 수 없습니다.");
 
   private final HttpStatus status;
   private final String code;
