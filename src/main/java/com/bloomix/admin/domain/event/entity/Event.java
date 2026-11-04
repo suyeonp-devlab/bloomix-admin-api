@@ -2,6 +2,7 @@ package com.bloomix.admin.domain.event.entity;
 
 import com.bloomix.admin.domain.BaseEntity;
 import com.bloomix.admin.domain.batch.job.eventsync.dto.EventSyncData;
+import com.bloomix.admin.domain.event.dto.EventRequest;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -132,5 +133,36 @@ public class Event extends BaseEntity {
   // 원본 확인 처리
   public void markChecked() {
     this.sourceCheckedAt = LocalDateTime.now();
+  }
+
+  // 행사 수정
+  public void update(EventRequest request) {
+    this.title = request.title();
+    this.startDate = request.startDate();
+    this.endDate = request.endDate();
+    this.capacity = request.capacity();
+    this.enabled = request.enabled();
+    this.verified = request.verified();
+  }
+
+  // 판매 중단
+  public void stopSale(String reason) {
+    this.onSale = false;
+    this.saleStopReason = reason;
+    this.saleStoppedAt = LocalDateTime.now();
+  }
+
+  // 판매 재개
+  public void resumeSale() {
+    this.onSale = true;
+    this.saleStopReason = null;
+    this.saleStoppedAt = null;
+  }
+
+  // 원본 변경 후보 반영
+  public void applySourceChange(EventSourceChange change) {
+    this.startDate = change.getStartDate();
+    this.endDate = change.getEndDate();
+    this.venueId = change.getVenueId();
   }
 }

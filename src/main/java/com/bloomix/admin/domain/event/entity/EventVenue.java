@@ -2,6 +2,7 @@ package com.bloomix.admin.domain.event.entity;
 
 import com.bloomix.admin.domain.BaseEntity;
 import com.bloomix.admin.domain.batch.job.eventsync.dto.EventVenueSyncData;
+import com.bloomix.admin.domain.event.dto.EventVenueRequest;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -75,5 +76,16 @@ public class EventVenue extends BaseEntity {
     entity.seatScale = data.getSeatScale();
     entity.verified = data.getSidoCode() != null;
     return entity;
+  }
+
+  // 장소 수정
+  public void update(EventVenueRequest request) {
+    this.name = request.name();
+    this.address = request.address();
+    this.sidoCode = request.sidoCode();
+    this.sigungu = request.sigungu();
+    this.latitude = request.latitude();
+    this.longitude = request.longitude();
+    this.verified = request.verified();
   }
 }
